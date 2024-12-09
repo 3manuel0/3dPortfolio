@@ -5,8 +5,16 @@ const mouse = {
   LEFT_BUTTON: 0,
   RIGHT_BUTTON: 2,
 };
+const keys = {
+  W: 87,
+  S: 83,
+  A: 65,
+  D: 68,
+};
+Object.freeze(mouse, keys);
 
-Object.freeze(mouse);
+let key = undefined;
+
 const BODY = document.body;
 const WIDTH = BODY.offsetWidth;
 const HEIGHT = BODY.offsetHeight;
@@ -34,23 +42,39 @@ floor.position.y = -1;
 scene.add(cube);
 scene.add(floor);
 camera.position.z = 3;
-// text.innerHTML
+
 function animate() {
   cube.rotation.x += 0.01;
   cube.rotation.y += 0.01;
 
-  text.innerHTML = `x : ${cube.rotation.x.toFixed(
-    2
-  )} </br>y : ${cube.rotation.y.toFixed(2)}`;
+  // text.innerHTML = `x : ${cube.rotation.x.toFixed(
+  //   2
+  // )} </br>y : ${cube.rotation.y.toFixed(2)}`;
 
   if (isLeftMouseDown) {
-    camera.position.z += 0.1;
+    // camera.position.z += 0.1;
+    camera.rotation.x += 0.01;
   }
 
   if (isRightMouseDown) {
-    camera.position.z -= 0.1;
+    // camera.position.z -= 0.1;
+    camera.rotation.x -= 0.01;
   }
 
+  switch (key) {
+    case keys.W:
+      camera.position.z -= 0.05;
+      break;
+    case keys.S:
+      camera.position.z += 0.05;
+      break;
+    case keys.A:
+      camera.position.x -= 0.05;
+      break;
+    case keys.D:
+      camera.position.x += 0.05;
+      break;
+  }
   renderer.setSize(BODY.offsetWidth, BODY.offsetHeight);
   camera.aspect = BODY.offsetWidth / BODY.offsetHeight;
   camera.updateProjectionMatrix();
@@ -74,6 +98,13 @@ window.onload = () => {
     if (event.button === mouse.RIGHT_BUTTON) {
       isRightMouseDown = false;
     }
+  };
+  window.onkeydown = (e) => {
+    key = e.keyCode;
+  };
+  window.onkeyup = (e) => {
+    key = undefined;
+    console.log(e.keyCode);
   };
   BODY.oncontextmenu = (event) => {
     console.log(event);
