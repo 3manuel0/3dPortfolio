@@ -11,15 +11,15 @@ const keys = {
   A: 65,
   D: 68,
 };
-Object.freeze(mouse, keys);
 
-let key = undefined;
+let currentPressedKeyState = new Set();
+Object.freeze(mouse, keys);
 
 const BODY = document.body;
 const WIDTH = BODY.offsetWidth;
 const HEIGHT = BODY.offsetHeight;
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, WIDTH / HEIGHT, 0.1, 2000);
+const camera = new THREE.PerspectiveCamera(75, WIDTH / HEIGHT, 0.1, 3000);
 const text = document.getElementById("info");
 let isLeftMouseDown = false;
 let isRightMouseDown = false;
@@ -37,7 +37,7 @@ const floorMaterial = new THREE.MeshBasicMaterial({
 const floor = new THREE.Mesh(floorGeometry, floorMaterial);
 const cube = new THREE.Mesh(geometry, material);
 scene.background = new THREE.Color(0x87ceeb);
-floor.rotation.x = -1;
+floor.rotation.x = -((90 * Math.PI) / 180);
 floor.position.y = -1;
 scene.add(cube);
 scene.add(floor);
@@ -52,28 +52,24 @@ function animate() {
   // )} </br>y : ${cube.rotation.y.toFixed(2)}`;
 
   if (isLeftMouseDown) {
-    // camera.position.z += 0.1;
     camera.rotation.x += 0.01;
   }
 
   if (isRightMouseDown) {
-    // camera.position.z -= 0.1;
     camera.rotation.x -= 0.01;
   }
 
-  switch (key) {
-    case keys.W:
-      camera.position.z -= 0.05;
-      break;
-    case keys.S:
-      camera.position.z += 0.05;
-      break;
-    case keys.A:
-      camera.position.x -= 0.05;
-      break;
-    case keys.D:
-      camera.position.x += 0.05;
-      break;
+  if (IsKeyDown(keys.W)) {
+    camera.position.z -= 0.05;
+  }
+  if (IsKeyDown(keys.S)) {
+    camera.position.z += 0.05;
+  }
+  if (IsKeyDown(keys.A)) {
+    camera.position.x -= 0.05;
+  }
+  if (IsKeyDown(keys.D)) {
+    camera.position.x += 0.05;
   }
   renderer.setSize(BODY.offsetWidth, BODY.offsetHeight);
   camera.aspect = BODY.offsetWidth / BODY.offsetHeight;
@@ -82,6 +78,7 @@ function animate() {
 }
 renderer.setAnimationLoop(animate);
 window.onload = () => {
+  // handeling mouse cliks events
   window.onmousedown = (event) => {
     event.preventDefault();
     if (event.button === mouse.LEFT_BUTTON) {
@@ -99,16 +96,28 @@ window.onload = () => {
       isRightMouseDown = false;
     }
   };
-  window.onkeydown = (e) => {
-    key = e.keyCode;
-  };
-  window.onkeyup = (e) => {
-    key = undefined;
-    console.log(e.keyCode);
-  };
+
+  // handeling keys
+  window.addEventListener("keydown", keyDown);
+  window.addEventListener("keyup", keyUp);
+
+  // stop right click from opening context menu
   BODY.oncontextmenu = (event) => {
     console.log(event);
     event.preventDefault();
     return false;
   };
+};
+
+// handeling keys
+const keyDown = (e) => {
+  currentPressedKeyState.add(e.keyCode);
+  console.log(currentPressedKeyState);
+};
+const keyUp = (e) => {
+  currentPressedKeyState.delete(e.keyCode);
+};
+
+const IsKeyDown = (key) => {
+  return currentPressedKeyState.has(key);
 };
